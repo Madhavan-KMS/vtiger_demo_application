@@ -36,6 +36,10 @@ class _MenuViewState
       "expanded": true,
 
       "items": [
+        {
+          "name":"Leads",
+          "icon": Icons.badge_outlined,
+        },
 
         {
           "name": "Tasks",
