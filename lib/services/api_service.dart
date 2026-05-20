@@ -223,6 +223,56 @@ static Future<dynamic> createTask({
   return response;
 }
 
+
+static Future<bool> deleteRecord({
+
+  required String crmUrl,
+
+  required String session,
+
+  required String moduleName,
+
+  required dynamic recordId,
+
+}) async {
+
+  try {
+
+    final response = await client.doDelete(
+
+      endpoint:
+          "$crmUrl/mobile-api/records?module=$moduleName",
+
+      headers: {
+
+        "Cookie":
+            "PHPSESSID=$session",
+
+        "Content-Type":
+            "application/json",
+      },
+
+      body: {
+
+        "id": recordId,
+      },
+    );
+
+    print("DELETE RESPONSE");
+    print(response);
+
+    return true;
+
+  } catch (e) {
+
+    print("DELETE ERROR");
+    print(e);
+
+    return false;
+  }
+}
+
+
   /// LOGOUT
 
 static Future<void> logout({

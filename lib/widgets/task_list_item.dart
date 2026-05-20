@@ -1,35 +1,219 @@
 import 'package:flutter/material.dart';
+
 import '../models/common/module_model.dart';
 import '../models/common/module_record_model.dart';
+
 import '../views/common/detail/module_detail_view.dart';
 
-class TaskListItem extends StatelessWidget {
-  final ModuleRecordModel record; 
+import '../../services/api_service.dart';
+import '../../utils/session_manager.dart';
+
+class TaskListItem extends StatefulWidget {
+  final ModuleRecordModel record;
+
   final ModuleModel moduleModel;
+
   final String moduleName;
+
   const TaskListItem({
     super.key,
     required this.record,
     required this.moduleModel,
     required this.moduleName,
   });
+
+  @override
+  State<TaskListItem> createState() =>
+      _TaskListItemState();
+}
+
+class _TaskListItemState
+    extends State<TaskListItem> {
+
+  /// DELETE RECORD
+
+  Future<void> deleteRecord() async {
+
+    final confirm =
+        await showDialog(
+
+      context: context,
+
+      builder: (context) {
+
+        return AlertDialog(
+
+          title: const Text(
+            "Delete Record",
+          ),
+
+          content: const Text(
+            "Are you sure you want to delete this record?",
+          ),
+
+          actions: [
+
+            TextButton(
+
+              onPressed: () {
+
+                Navigator.pop(
+                  context,
+                  false,
+                );
+              },
+
+              child: const Text(
+                "Cancel",
+              ),
+            ),
+
+            ElevatedButton(
+
+              onPressed: () {
+
+                Navigator.pop(
+                  context,
+                  true,
+                );
+              },
+
+              child: const Text(
+                "Delete",
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) {
+      return;
+    }
+
+    try {
+
+      String crmUrl =
+          await SessionManager.getCrmUrl();
+
+      String session =
+          await SessionManager.getSession();
+
+      final success =
+          await ApiService.deleteRecord(
+
+        crmUrl: crmUrl,
+
+        session: session,
+
+        moduleName: widget.moduleName,
+
+        recordId:
+            widget.record.getValue("id"),
+      );
+
+      if (!mounted) return;
+
+      if (success) {
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
+
+          const SnackBar(
+
+            content: Text(
+              "Record deleted successfully",
+            ),
+          ),
+        );
+
+        setState(() {
+
+          widget.record.rawData["deleted"] = true;
+        });
+
+      } else {
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
+
+          const SnackBar(
+
+            content: Text(
+              "Failed to delete record",
+            ),
+          ),
+        );
+      }
+
+    } catch (e) {
+
+      print(e);
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+
+        const SnackBar(
+
+          content: Text(
+            "Something went wrong",
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    /// HIDE DELETED RECORD
+
+    if (widget.record.rawData["deleted"] == true) {
+
+      return const SizedBox();
+    }
+
     /// FIRST KEY FIELD
-    String firstFieldName =moduleModel.summaryFields[0]["fieldname"];
+
+    String firstFieldName = "subject";
+
+    if (widget.moduleModel.summaryFields
+        .isNotEmpty) {
+
+      firstFieldName =
+          widget
+              .moduleModel
+              .summaryFields[0]["fieldname"];
+    }
+
     /// FIRST FIELD VALUE
-    final firstValue =record.getValue(firstFieldName);
+
+    final firstValue =
+        widget.record.getValue(
+      firstFieldName,
+    );
+
     return InkWell(
+
       onTap: () {
+
         Navigator.push(
+
           context,
+
           MaterialPageRoute(
+
             builder:
                 (context) =>
                     ModuleDetailView(
-                      record: record,
-                      moduleModel:moduleModel,
-                      moduleName: moduleName,
+
+                      record: widget.record,
+
+                      moduleModel:
+                          widget.moduleModel,
+
+                      moduleName:
+                          widget.moduleName,
                     ),
           ),
         );
@@ -37,7 +221,8 @@ class TaskListItem extends StatelessWidget {
 
       child: Card(
 
-        margin: const EdgeInsets.symmetric(
+        margin:
+            const EdgeInsets.symmetric(
 
           horizontal: 10,
           vertical: 6,
@@ -88,21 +273,23 @@ class TaskListItem extends StatelessWidget {
 
                     const SizedBox(height: 5),
 
-                    /// OPTIONAL SECOND FIELD
+                    /// SECOND FIELD
 
-                    if (moduleModel
+                    if (widget
+                            .moduleModel
                             .summaryFields
                             .length >
                         1)
 
                       Text(
 
-                        record.getValue(
+                        widget.record.getValue(
 
-                          moduleModel
-                              .summaryFields[1]
-                                  ["fieldname"],
-                        ),
+                          widget
+                                  .moduleModel
+                                  .summaryFields[1]
+                              ["fieldname"],
+                        ).toString(),
 
                         style:
                             const TextStyle(
@@ -112,6 +299,27 @@ class TaskListItem extends StatelessWidget {
                   ],
                 ),
               ),
+
+              /// DELETE BUTTON
+
+              if (widget.record.getValue(
+                      "deleteable") ==
+                  true)
+
+                IconButton(
+
+                  onPressed:
+                      deleteRecord,
+
+                  icon: const Icon(
+
+                    Icons.delete_outline,
+
+                    color: Colors.red,
+                  ),
+                ),
+
+              /// DETAIL ARROW
 
               const Icon(
                 Icons.arrow_forward_ios,

@@ -50,7 +50,7 @@ class _MenuViewState
           "name": "Contacts",
           "icon": Icons.person_outline,
         },
-
+        
         {
           "name": "Documents",
           "icon": Icons.description_outlined,

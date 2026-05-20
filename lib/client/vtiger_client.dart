@@ -1,4 +1,8 @@
 import 'vtiger_ws_client.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart'
+    as http;
 
 class VtigerClient {
 
@@ -47,4 +51,38 @@ class VtigerClient {
       body: body,
     );
   }
+  Future<dynamic> doDelete({
+
+  required String endpoint,
+
+  Map<String, String>? headers,
+
+  dynamic body,
+
+}) async {
+
+  final response = await http.delete(
+
+    Uri.parse(endpoint),
+
+    headers: headers,
+
+    body: jsonEncode(body),
+  );
+
+  print("DELETE STATUS CODE");
+  print(response.statusCode);
+
+  print("DELETE RESPONSE BODY");
+  print(response.body);
+
+  if (response.statusCode == 200) {
+
+    return jsonDecode(response.body);
+  }
+
+  throw Exception(
+    "DELETE API FAILED",
+  );
+}
 }
