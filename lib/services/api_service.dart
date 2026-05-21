@@ -272,6 +272,52 @@ static Future<bool> deleteRecord({
   }
 }
 
+static Future<bool> updateRecord({
+
+  required String crmUrl,
+
+  required String session,
+
+  required String moduleName,
+
+  required Map body,
+
+}) async {
+
+  try {
+
+    final response = await client.doPut(
+
+      endpoint:
+          "$crmUrl/mobile-api/records?module=$moduleName",
+
+      headers: {
+
+        "Cookie":
+            "PHPSESSID=$session",
+
+        "Content-Type":
+            "application/json",
+      },
+
+      body: body,
+    );
+
+    print("UPDATE RESPONSE");
+    print(response);
+
+    return true;
+
+  } catch (e) {
+
+    print("UPDATE ERROR");
+    print(e);
+
+    return false;
+  }
+}
+
+
 
   /// LOGOUT
 

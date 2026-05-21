@@ -70,4 +70,62 @@ class CreateTaskViewModel {
       return false;
     }
   }
+
+Future<bool> updateTask({
+
+  required String id,
+
+  required String subject,
+
+  required String taskStatus,
+
+  required String priority,
+
+  required String taskType,
+
+}) async {
+
+  try {
+
+    String crmUrl =
+        await SessionManager.getCrmUrl();
+
+    String session =
+        await SessionManager.getSession();
+
+    Map body = {
+
+      "id": id,
+
+      "subject": subject,
+
+      "taskstatus": taskStatus,
+
+      "taskpriority": priority,
+
+      "tasktype": taskType,
+    };
+
+    bool success =
+    await ApiService.updateRecord(
+
+      crmUrl: crmUrl,
+
+      session: session,
+
+      moduleName: "Tasks",
+
+      body: body,
+    );
+
+    return success;
+
+  } catch (e) {
+
+    print(e);
+
+    return false;
+  }
+}
+
 }

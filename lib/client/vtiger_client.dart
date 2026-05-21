@@ -85,4 +85,47 @@ class VtigerClient {
     "DELETE API FAILED",
   );
 }
+Future<dynamic> doPut({
+
+  required String endpoint,
+
+  required Map<String, String> headers,
+
+  required dynamic body,
+
+}) async {
+
+  try {
+
+    final response = await http.put(
+
+      Uri.parse(endpoint),
+
+      headers: headers,
+
+      body: jsonEncode(body),
+    );
+
+    print("PUT STATUS CODE");
+    print(response.statusCode);
+
+    print("PUT RESPONSE");
+    print(response.body);
+
+    if (response.statusCode == 200) {
+
+      return jsonDecode(response.body);
+    }
+
+    throw Exception("PUT API FAILED");
+
+  } catch (e) {
+
+    print("PUT ERROR");
+    print(e);
+
+    rethrow;
+  }
 }
+}
+

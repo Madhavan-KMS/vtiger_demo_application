@@ -4,35 +4,40 @@ import '../models/common/module_model.dart';
 import '../models/common/module_record_model.dart';
 
 import '../views/common/detail/module_detail_view.dart';
+import '../views/edit_task_view.dart';
 
 import '../../services/api_service.dart';
 import '../../utils/session_manager.dart';
 
-class TaskListItem extends StatefulWidget {
+class TaskListItem extends StatelessWidget {
+
   final ModuleRecordModel record;
 
   final ModuleModel moduleModel;
 
   final String moduleName;
 
+  final Future<void> Function()
+      onRefresh;
+
   const TaskListItem({
+
     super.key,
+
     required this.record,
+
     required this.moduleModel,
+
     required this.moduleName,
+
+    required this.onRefresh,
   });
-
-  @override
-  State<TaskListItem> createState() =>
-      _TaskListItemState();
-}
-
-class _TaskListItemState
-    extends State<TaskListItem> {
 
   /// DELETE RECORD
 
-  Future<void> deleteRecord() async {
+  Future<void> deleteRecord(
+    BuildContext context,
+  ) async {
 
     final confirm =
         await showDialog(
@@ -106,13 +111,13 @@ class _TaskListItemState
 
         session: session,
 
-        moduleName: widget.moduleName,
+        moduleName: moduleName,
 
         recordId:
-            widget.record.getValue("id"),
+            record.getValue("id"),
       );
 
-      if (!mounted) return;
+      if (!context.mounted) return;
 
       if (success) {
 
@@ -127,10 +132,8 @@ class _TaskListItemState
           ),
         );
 
-        setState(() {
-
-          widget.record.rawData["deleted"] = true;
-        });
+        /// REFRESH LIST
+        await onRefresh();
 
       } else {
 
@@ -148,7 +151,7 @@ class _TaskListItemState
 
     } catch (e) {
 
-      print(e);
+      debugPrint(e.toString());
 
       ScaffoldMessenger.of(context)
           .showSnackBar(
@@ -166,30 +169,24 @@ class _TaskListItemState
   @override
   Widget build(BuildContext context) {
 
-    /// HIDE DELETED RECORD
-
-    if (widget.record.rawData["deleted"] == true) {
-
-      return const SizedBox();
-    }
-
     /// FIRST KEY FIELD
 
-    String firstFieldName = "subject";
+    String firstFieldName =
+        "subject";
 
-    if (widget.moduleModel.summaryFields
+    if (moduleModel.summaryFields
         .isNotEmpty) {
 
       firstFieldName =
-          widget
-              .moduleModel
-              .summaryFields[0]["fieldname"];
+          moduleModel
+                  .summaryFields[0]
+              ["fieldname"];
     }
 
     /// FIRST FIELD VALUE
 
     final firstValue =
-        widget.record.getValue(
+        record.getValue(
       firstFieldName,
     );
 
@@ -207,13 +204,13 @@ class _TaskListItemState
                 (context) =>
                     ModuleDetailView(
 
-                      record: widget.record,
+                      record: record,
 
                       moduleModel:
-                          widget.moduleModel,
+                          moduleModel,
 
                       moduleName:
-                          widget.moduleName,
+                          moduleName,
                     ),
           ),
         );
@@ -246,12 +243,15 @@ class _TaskListItemState
 
               const SizedBox(width: 15),
 
+              /// TEXT AREA
+
               Expanded(
 
                 child: Column(
 
                   crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      CrossAxisAlignment
+                          .start,
 
                   children: [
 
@@ -275,18 +275,16 @@ class _TaskListItemState
 
                     /// SECOND FIELD
 
-                    if (widget
-                            .moduleModel
+                    if (moduleModel
                             .summaryFields
                             .length >
                         1)
 
                       Text(
 
-                        widget.record.getValue(
+                        record.getValue(
 
-                          widget
-                                  .moduleModel
+                          moduleModel
                                   .summaryFields[1]
                               ["fieldname"],
                         ).toString(),
@@ -300,16 +298,63 @@ class _TaskListItemState
                 ),
               ),
 
+              /// EDIT BUTTON
+
+              if (record.getValue(
+                      "editable") ==
+                  true)
+
+                IconButton(
+
+                  onPressed: () async {
+
+                    final result =
+                        await Navigator.push(
+
+                      context,
+
+                      MaterialPageRoute(
+
+                        builder:
+                            (context) =>
+                                EditTaskView(
+
+                                  record:
+                                      record,
+                                ),
+                      ),
+                    );
+
+                    /// REFRESH AFTER EDIT
+
+                    if (result == true) {
+
+                      await onRefresh();
+                    }
+                  },
+
+                  icon: const Icon(
+
+                    Icons.edit_outlined,
+
+                    color: Colors.blue,
+                  ),
+                ),
+
               /// DELETE BUTTON
 
-              if (widget.record.getValue(
+              if (record.getValue(
                       "deleteable") ==
                   true)
 
                 IconButton(
 
-                  onPressed:
-                      deleteRecord,
+                  onPressed: () {
+
+                    deleteRecord(
+                      context,
+                    );
+                  },
 
                   icon: const Icon(
 
@@ -318,13 +363,6 @@ class _TaskListItemState
                     color: Colors.red,
                   ),
                 ),
-
-              /// DETAIL ARROW
-
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 18,
-              ),
             ],
           ),
         ),
