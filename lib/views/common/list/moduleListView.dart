@@ -5,8 +5,8 @@ import '../../../widgets/task_list_item.dart';
 import '../../../utils/session_manager.dart';
 import '../../login_view.dart';
 import '../../../services/api_service.dart';
-import '../../create_task_view.dart';
 import '../menu/menu_view.dart';
+import '../../quick_create_view.dart';
 
 class ModuleListView extends StatefulWidget {
   final String moduleName;
@@ -93,24 +93,31 @@ class _ModuleListViewState
       /// CREATE TASK BUTTON
       floatingActionButton:
           FloatingActionButton(
-        onPressed: () async {
-          final result =
-              await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) =>
-                      const CreateTaskView(),
-            ),
-          );
 
-          /// REFRESH AFTER CREATE
-          if (result == true) {
-            await refreshList();
-          }
-        },
-        child: const Icon(Icons.add),
+  onPressed: () async {
+
+    final result =
+        await Navigator.push(
+
+      context,
+
+      MaterialPageRoute(
+
+        builder:
+            (context) =>
+                const QuickCreateView(),
       ),
+    );
+
+    if (result == true) {
+
+      await loadData();
+    }
+  },
+
+  child: const Icon(Icons.add),
+),
+
 
       /// DRAWER
       drawer: const MenuView(),

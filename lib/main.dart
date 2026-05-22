@@ -34,6 +34,7 @@ class _MyAppState extends State<MyApp> {
       isLoading = false;
     });
   }
+  
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -48,11 +49,11 @@ class _MyAppState extends State<MyApp> {
     }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home:  isLoggedIn
-              ? const ModuleListView(
-                  moduleName: "Tasks",
-                )
-              : const LoginView(),
+      home: isLoggedIn
+        ? const ModuleListView( 
+             moduleName: "Tasks",
+          )
+        : const LoginView(),
     );
   }
 }

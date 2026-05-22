@@ -45,7 +45,12 @@ class _MenuViewState
           "name": "Tasks",
           "icon": Icons.checklist,
         },
-
+ 
+        {
+          "name":"Accounts",
+          "icon":Icons.account_box
+        },
+ 
         {
           "name": "Contacts",
           "icon": Icons.person_outline,
